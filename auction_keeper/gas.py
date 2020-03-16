@@ -17,6 +17,7 @@
 
 from typing import Optional
 
+import requests
 from ethgasstation_client import EthGasStation
 from pymaker.gas import GasPrice, IncreasingGasPrice
 
@@ -66,3 +67,26 @@ class DynamicGasPrice(GasPrice):
                                   increase_by=10*self.GWEI,
                                   every_secs=60,
                                   max_price=100*self.GWEI).get_gas_price(time_elapsed)
+
+
+class PoaGasPrice(GasPrice):
+    
+    GWEI = 1000000000
+
+    def get_gas_price(self, time_elapsed: int) -> Optional[int]:
+        gas = requests.get('https://gasprice.poa.network').json()
+        if gas['health']:
+            fast = min(gas['fast'], 1000)
+            return IncreasingGasPrice(
+                initial_price=int(fast*self.GWEI),
+                increase_by=10*self.GWEI,
+                every_secs=30,
+                max_price=1000*self.GWEI).get_gas_price(time_elapsed)
+        else:
+            return self.default_gas_pricing(time_elapsed)
+
+    def default_gas_pricing(self, time_elapsed: int):
+        return IncreasingGasPrice(initial_price=10*self.GWEI,
+                                  increase_by=10*self.GWEI,
+                                  every_secs=30,
+                                  max_price=500*self.GWEI).get_gas_price(time_elapsed)

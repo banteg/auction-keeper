@@ -35,7 +35,7 @@ from pymaker.keys import register_keys
 from pymaker.lifecycle import Lifecycle
 from pymaker.numeric import Wad, Ray, Rad
 
-from auction_keeper.gas import DynamicGasPrice, UpdatableGasPrice
+from auction_keeper.gas import DynamicGasPrice, UpdatableGasPrice, PoaGasPrice
 from auction_keeper.logic import Auction, Auctions
 from auction_keeper.model import ModelFactory
 from auction_keeper.strategy import FlopperStrategy, FlapperStrategy, FlipperStrategy
@@ -174,7 +174,7 @@ class AuctionKeeper:
         if self.arguments.ethgasstation_api_key:
             self.gas_price = DynamicGasPrice(self.arguments.ethgasstation_api_key)
         else:
-            self.gas_price = DefaultGasPrice()
+            self.gas_price = PoaGasPrice()
 
         self.vat_dai_target = Wad.from_number(self.arguments.vat_dai_target) if \
             self.arguments.vat_dai_target is not None else None
